@@ -2,8 +2,8 @@
  * @Author: Vincent Young
  * @Date: 2023-02-07 03:35:39
  * @LastEditors: Vincent Young
- * @LastEditTime: 2023-02-07 04:54:58
- * @FilePath: /wb/main.go
+ * @LastEditTime: 2023-02-07 05:11:03
+ * @FilePath: /WeiboSearcher/main.go
  * @Telegram: https://t.me/missuo
  *
  * Copyright © 2023 by Vincent, All Rights Reserved.
@@ -24,7 +24,7 @@ type User struct {
 
 func main() {
 	// Connect Clickhouse
-	dsn := "clickhouse://default:@192.168.36.134:29000/weibo"
+	dsn := "clickhouse://default:@127.0.0.1:29000/weibo"
 	db, err := gorm.Open(clickhouse.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
