@@ -2,7 +2,7 @@
  * @Author: Vincent Young
  * @Date: 2023-02-07 03:35:39
  * @LastEditors: Vincent Young
- * @LastEditTime: 2023-02-07 05:11:03
+ * @LastEditTime: 2023-02-12 22:26:28
  * @FilePath: /WeiboSearcher/main.go
  * @Telegram: https://t.me/missuo
  *
@@ -12,7 +12,11 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
+
 	"github.com/gin-gonic/gin"
+	"gopkg.in/yaml.v2"
 	"gorm.io/driver/clickhouse"
 	"gorm.io/gorm"
 )
@@ -22,9 +26,52 @@ type User struct {
 	Mobile string
 }
 
+type Set struct {
+	ClickhouseConf    ClickhouseConf    `yaml:"clickhouse"`
+	WeiboSearcherConf WeiboSearcherConf `yaml:"weiboSearcher"`
+}
+
+type ClickhouseConf struct {
+	Host     string `yaml:"host"`
+	Port     string `yaml:"port"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+	Dbname   string `yaml:"dbname"`
+}
+
+type WeiboSearcherConf struct {
+	ListenAddress string `yaml:"listenAddress"`
+	ListenPort    string `yaml:"listenPort"`
+}
+
+func (conf *Set) getConf() *Set {
+	yamlFile, err := ioutil.ReadFile("./config.yml")
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	err = yaml.Unmarshal(yamlFile, conf)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	return conf
+}
+
 func main() {
+	// Get Configuration
+	var set Set
+	set.getConf()
+	var clickhouseConf = set.ClickhouseConf
+	var appConf = set.WeiboSearcherConf
+	dbHost := clickhouseConf.Host
+	dbPort := clickhouseConf.Port
+	dbUsername := clickhouseConf.Username
+	dbPassword := clickhouseConf.Password
+	dbName := clickhouseConf.Dbname
+	appAddress := appConf.ListenAddress
+	appPort := appConf.ListenPort
+
 	// Connect Clickhouse
-	dsn := "clickhouse://default:@127.0.0.1:29000/weibo"
+	dsn := "clickhouse://" + dbUsername + ":" + dbPassword + "@" + dbHost + ":" + dbPort + "/" + dbName
 	db, err := gorm.Open(clickhouse.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
@@ -74,5 +121,5 @@ func main() {
 		}
 
 	})
-	r.Run(":11119")
+	r.Run(appAddress + ":" + appPort)
 }

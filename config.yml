@@ -1,0 +1,12 @@
+# Clickhouse
+clickhouse:
+  host: 192.168.36.134
+  port: 29000
+  username: default
+  password: 
+  dbname: weibo
+
+# WeiboSearcher
+weiboSearcher:
+  listenAddress: 127.0.0.1
+  listenPort: 11119
