@@ -8,5 +8,5 @@ clickhouse:
 
 # WeiboSearcher
 weiboSearcher:
-  listenAddress: 127.0.0.1
+  listenAddress: 0.0.0.0
   listenPort: 11119
