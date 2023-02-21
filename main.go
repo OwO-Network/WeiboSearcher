@@ -2,7 +2,7 @@
  * @Author: Vincent Young
  * @Date: 2023-02-07 03:35:39
  * @LastEditors: Vincent Young
- * @LastEditTime: 2023-02-12 22:26:28
+ * @LastEditTime: 2023-02-21 23:27:50
  * @FilePath: /WeiboSearcher/main.go
  * @Telegram: https://t.me/missuo
  *
@@ -14,6 +14,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"regexp"
 
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
@@ -89,7 +90,9 @@ func main() {
 	})
 
 	r.Any("/wb", func(c *gin.Context) {
-		key := c.Query("u")
+		re := regexp.MustCompile(`\d+`)
+		u := c.Query("u")
+		key := re.FindString(u)
 		var result User
 		if len(key) == 10 {
 			// Input Weibo Uid
