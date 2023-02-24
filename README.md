@@ -47,7 +47,8 @@ mobile String
 **We recommend that you use two tables, which can greatly speed up the efficiency of the reverse query.**
 
 ## TODO List
-- [ ] Support custom configuration
+- [x] Support custom configuration
+- [x] Support Telegram Bot
 - [ ] Add frontend pages
 
 ## Statement
