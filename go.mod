@@ -3,11 +3,17 @@ module wb
 go 1.19
 
 require (
+	github.com/gin-gonic/gin v1.8.2
+	gopkg.in/yaml.v2 v2.4.0
+	gorm.io/driver/clickhouse v0.5.0
+	gorm.io/gorm v1.24.5
+)
+
+require (
 	github.com/ClickHouse/ch-go v0.48.0 // indirect
 	github.com/ClickHouse/clickhouse-go/v2 v2.3.0 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/gin-gonic/gin v1.8.2 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.6.1 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
@@ -34,12 +40,8 @@ require (
 	go.opentelemetry.io/otel v1.10.0 // indirect
 	go.opentelemetry.io/otel/trace v1.10.0 // indirect
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
-	golang.org/x/net v0.4.0 // indirect
-	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/text v0.5.0 // indirect
+	golang.org/x/net v0.7.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
-	gopkg.in/telebot.v3 v3.1.2 // indirect
-	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gorm.io/driver/clickhouse v0.5.0 // indirect
-	gorm.io/gorm v1.24.5 // indirect
 )
