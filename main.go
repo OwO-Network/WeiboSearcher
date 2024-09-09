@@ -1,8 +1,8 @@
 /*
  * @Author: Vincent Young
  * @Date: 2023-02-07 03:35:39
- * @LastEditors: Vincent Young
- * @LastEditTime: 2023-12-08 19:19:44
+ * @LastEditors: Vincent Yang
+ * @LastEditTime: 2024-09-08 21:56:09
  * @FilePath: /WeiboSearcher/main.go
  * @Telegram: https://t.me/missuo
  *
@@ -17,6 +17,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
 	"gorm.io/driver/clickhouse"
@@ -80,6 +81,7 @@ func main() {
 	}
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
+	r.Use(cors.Default())
 	r.GET("/", func(c *gin.Context) {
 		// Index Page
 		c.JSON(http.StatusOK, gin.H{
