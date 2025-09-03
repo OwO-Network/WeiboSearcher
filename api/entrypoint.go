@@ -13,7 +13,7 @@
 package api
 
 import (
-	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -53,6 +53,7 @@ func getConfigFromEnvOrFile() *Set {
 
 	// Try to get configuration from environment variables first
 	if dbHost := os.Getenv("CLICKHOUSE_HOST"); dbHost != "" {
+		log.Printf("Using environment variables for configuration")
 		set.ClickhouseConf.Host = dbHost
 		set.ClickhouseConf.Port = getEnvOrDefault("CLICKHOUSE_PORT", "9000")
 		set.ClickhouseConf.Username = getEnvOrDefault("CLICKHOUSE_USERNAME", "default")
@@ -64,9 +65,11 @@ func getConfigFromEnvOrFile() *Set {
 	}
 
 	// Fall back to config file if environment variables are not set
+	log.Printf("Environment variables not found, trying config file")
 	yamlFile, err := os.ReadFile("./config.yml")
 	if err != nil {
-		fmt.Println("Error reading config file:", err.Error())
+		log.Printf("Error reading config file: %v", err)
+		log.Printf("Using default configuration values")
 		// Return default values if both env vars and config file fail
 		set.ClickhouseConf.Host = "localhost"
 		set.ClickhouseConf.Port = "9000"
@@ -79,8 +82,9 @@ func getConfigFromEnvOrFile() *Set {
 	}
 	err = yaml.Unmarshal(yamlFile, &set)
 	if err != nil {
-		fmt.Println("Error parsing config file:", err.Error())
+		log.Printf("Error parsing config file: %v", err)
 	}
+	log.Printf("Configuration loaded from config file")
 	return &set
 }
 
@@ -93,6 +97,7 @@ func getEnvOrDefault(key, defaultValue string) string {
 
 var (
 	app *gin.Engine
+	db  *gorm.DB
 )
 
 func init() {
@@ -107,9 +112,13 @@ func init() {
 
 	// Connect Clickhouse
 	dsn := "clickhouse://" + dbUsername + ":" + dbPassword + "@" + dbHost + ":" + dbPort + "/" + dbName
-	db, err := gorm.Open(clickhouse.Open(dsn), &gorm.Config{})
+	var err error
+	db, err = gorm.Open(clickhouse.Open(dsn), &gorm.Config{})
 	if err != nil {
-		panic("failed to connect database")
+		log.Printf("Failed to connect to database: %v", err)
+		log.Printf("DSN: %s", dsn)
+		// Don't panic in serverless environment, let the function handle errors gracefully
+		db = nil
 	}
 
 	gin.SetMode(gin.ReleaseMode)
@@ -126,6 +135,15 @@ func init() {
 	})
 
 	app.Any("/wb", func(c *gin.Context) {
+		// Check if database is available
+		if db == nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"code":    http.StatusInternalServerError,
+				"message": "Database connection not available",
+			})
+			return
+		}
+
 		re := regexp.MustCompile(`\d+`)
 		u := c.Query("u")
 		key := re.FindString(u)
