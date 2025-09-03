@@ -1,19 +1,19 @@
 /*
- * @Author: Vincent Young
- * @Date: 2023-02-07 03:35:39
+ * @Author: Vincent Yang
+ * @Date: 2025-09-03 01:03:00
  * @LastEditors: Vincent Yang
- * @LastEditTime: 2024-09-08 21:56:09
- * @FilePath: /WeiboSearcher/main.go
+ * @LastEditTime: 2025-09-04 01:10:22
+ * @FilePath: /WeiboSearcher/api/entrypoint.go
  * @Telegram: https://t.me/missuo
+ * @GitHub: https://github.com/missuo
  *
- * Copyright © 2023 by Vincent, All Rights Reserved.
+ * Copyright © 2025 by Vincent, All Rights Reserved.
  */
 
-package main
+package api
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"regexp"
@@ -50,7 +50,7 @@ type WeiboSearcherConf struct {
 
 func getConfigFromEnvOrFile() *Set {
 	var set Set
-	
+
 	// Try to get configuration from environment variables first
 	if dbHost := os.Getenv("CLICKHOUSE_HOST"); dbHost != "" {
 		set.ClickhouseConf.Host = dbHost
@@ -62,9 +62,9 @@ func getConfigFromEnvOrFile() *Set {
 		set.WeiboSearcherConf.ListenPort = getEnvOrDefault("LISTEN_PORT", "8080")
 		return &set
 	}
-	
+
 	// Fall back to config file if environment variables are not set
-	yamlFile, err := ioutil.ReadFile("./config.yml")
+	yamlFile, err := os.ReadFile("./config.yml")
 	if err != nil {
 		fmt.Println("Error reading config file:", err.Error())
 		// Return default values if both env vars and config file fail
@@ -91,18 +91,19 @@ func getEnvOrDefault(key, defaultValue string) string {
 	return defaultValue
 }
 
-func main() {
+var (
+	app *gin.Engine
+)
+
+func init() {
 	// Get Configuration
 	set := getConfigFromEnvOrFile()
 	var clickhouseConf = set.ClickhouseConf
-	var appConf = set.WeiboSearcherConf
 	dbHost := clickhouseConf.Host
 	dbPort := clickhouseConf.Port
 	dbUsername := clickhouseConf.Username
 	dbPassword := clickhouseConf.Password
 	dbName := clickhouseConf.Dbname
-	appAddress := appConf.ListenAddress
-	appPort := appConf.ListenPort
 
 	// Connect Clickhouse
 	dsn := "clickhouse://" + dbUsername + ":" + dbPassword + "@" + dbHost + ":" + dbPort + "/" + dbName
@@ -110,20 +111,21 @@ func main() {
 	if err != nil {
 		panic("failed to connect database")
 	}
+
 	gin.SetMode(gin.ReleaseMode)
-	r := gin.Default()
-	r.Use(cors.Default())
-	r.GET("/", func(c *gin.Context) {
+	app = gin.Default()
+	app.Use(cors.Default())
+
+	app.GET("/", func(c *gin.Context) {
 		// Index Page
 		c.JSON(http.StatusOK, gin.H{
 			"code":    http.StatusOK,
 			"message": "This is Weibo SGK. Made by Vincent.",
 			"usage":   "GET/POST to /wb with parameter u",
 		})
-
 	})
 
-	r.Any("/wb", func(c *gin.Context) {
+	app.Any("/wb", func(c *gin.Context) {
 		re := regexp.MustCompile(`\d+`)
 		u := c.Query("u")
 		key := re.FindString(u)
@@ -156,16 +158,21 @@ func main() {
 				"mobile": result.Mobile,
 			})
 		}
-
 	})
 
 	// Catch-all route to handle undefined paths
-	r.NoRoute(func(c *gin.Context) {
+	app.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{
 			"code":    http.StatusNotFound,
 			"message": "Path not found",
 		})
 	})
-
-	r.Run(appAddress + ":" + appPort)
 }
+
+// Entrypoint is the serverless function handler for Vercel
+func Entrypoint(w http.ResponseWriter, r *http.Request) {
+	app.ServeHTTP(w, r)
+}
+
+// Type assertion to ensure our function matches http.HandlerFunc
+var _ http.HandlerFunc = Entrypoint
