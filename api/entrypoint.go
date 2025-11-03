@@ -55,7 +55,7 @@ func getConfigFromEnvOrFile() *Set {
 	if dbHost := os.Getenv("CLICKHOUSE_HOST"); dbHost != "" {
 		log.Printf("Using environment variables for configuration")
 		set.ClickhouseConf.Host = dbHost
-		set.ClickhouseConf.Port = getEnvOrDefault("CLICKHOUSE_PORT", "9000")
+		set.ClickhouseConf.Port = getEnvOrDefault("CLICKHOUSE_PORT", "9009")
 		set.ClickhouseConf.Username = getEnvOrDefault("CLICKHOUSE_USERNAME", "default")
 		set.ClickhouseConf.Password = getEnvOrDefault("CLICKHOUSE_PASSWORD", "")
 		set.ClickhouseConf.Dbname = getEnvOrDefault("CLICKHOUSE_DBNAME", "default")
