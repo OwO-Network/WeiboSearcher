@@ -72,7 +72,7 @@ func getConfigFromEnvOrFile() *Set {
 		log.Printf("Using default configuration values")
 		// Return default values if both env vars and config file fail
 		set.ClickhouseConf.Host = "localhost"
-		set.ClickhouseConf.Port = "9000"
+		set.ClickhouseConf.Port = "9009"
 		set.ClickhouseConf.Username = "default"
 		set.ClickhouseConf.Password = ""
 		set.ClickhouseConf.Dbname = "default"

@@ -50,11 +50,11 @@ type WeiboSearcherConf struct {
 
 func getConfigFromEnvOrFile() *Set {
 	var set Set
-	
+
 	// Try to get configuration from environment variables first
 	if dbHost := os.Getenv("CLICKHOUSE_HOST"); dbHost != "" {
 		set.ClickhouseConf.Host = dbHost
-		set.ClickhouseConf.Port = getEnvOrDefault("CLICKHOUSE_PORT", "9000")
+		set.ClickhouseConf.Port = getEnvOrDefault("CLICKHOUSE_PORT", "9009")
 		set.ClickhouseConf.Username = getEnvOrDefault("CLICKHOUSE_USERNAME", "default")
 		set.ClickhouseConf.Password = getEnvOrDefault("CLICKHOUSE_PASSWORD", "")
 		set.ClickhouseConf.Dbname = getEnvOrDefault("CLICKHOUSE_DBNAME", "default")
@@ -62,14 +62,14 @@ func getConfigFromEnvOrFile() *Set {
 		set.WeiboSearcherConf.ListenPort = getEnvOrDefault("LISTEN_PORT", "8080")
 		return &set
 	}
-	
+
 	// Fall back to config file if environment variables are not set
 	yamlFile, err := ioutil.ReadFile("./config.yml")
 	if err != nil {
 		fmt.Println("Error reading config file:", err.Error())
 		// Return default values if both env vars and config file fail
 		set.ClickhouseConf.Host = "localhost"
-		set.ClickhouseConf.Port = "9000"
+		set.ClickhouseConf.Port = "9009"
 		set.ClickhouseConf.Username = "default"
 		set.ClickhouseConf.Password = ""
 		set.ClickhouseConf.Dbname = "default"
